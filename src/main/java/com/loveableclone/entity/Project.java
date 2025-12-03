@@ -1,24 +1,24 @@
 package com.loveableclone.entity;
 
-
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
 
-@Getter
 @Setter
+@Getter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class User {
-
+public class Project {
     Long id;
 
-    String email;
-    String passwordHash;
     String name;
-    String avtarUrl; //For profile picture
+
+    User owner;
+    Boolean isPublic = false;
 
     Instant createdAt;
     Instant updatedAt;
-    Instant deletedAt;
+    Instant deletedAt;//soft delete
 }
