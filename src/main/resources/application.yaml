@@ -1,0 +1,4 @@
+spring:
+  application:
+    name: Loveable-clone
+    description: This is Loveable clone project
