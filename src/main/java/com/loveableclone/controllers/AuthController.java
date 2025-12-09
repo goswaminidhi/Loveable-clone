@@ -7,7 +7,6 @@ import com.loveableclone.dto.auth.LoginRequest;
 import com.loveableclone.dto.auth.SignupRequest;
 import com.loveableclone.dto.auth.UserProfileResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,11 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
 
-    @Autowired
-    private UserService userService;
+
+    private final UserService userService;
 
     @PostMapping("/signup")
     public ResponseEntity<AuthResponse> signup(SignupRequest request){
