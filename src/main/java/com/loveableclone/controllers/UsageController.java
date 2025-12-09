@@ -1,0 +1,32 @@
+package com.loveableclone.controllers;
+
+import com.loveableclone.Service.UsageService;
+import com.loveableclone.dto.subscription.PlanLimitsResponse;
+import com.loveableclone.dto.subscription.UsageTodayResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/usage")
+@RequiredArgsConstructor
+public class UsageController {
+
+    private final UsageService usageService;
+
+    @GetMapping("/today")
+    public ResponseEntity<UsageTodayResponse> getTodayUsage(){
+        Long userId = 1L;
+        return ResponseEntity.ok(usageService.getTodayUsageOfUser(userId));
+    }
+
+
+    @GetMapping("/limits")
+    public ResponseEntity<PlanLimitsResponse> getPlansLimitsResponse(){
+        Long userId = 1L;
+        return ResponseEntity.ok(usageService.getCurrentSubscriptionLimitsOfUser(userId));
+    }
+
+}
