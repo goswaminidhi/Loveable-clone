@@ -2,3 +2,19 @@ spring:
   application:
     name: Loveable-clone
     description: This is Loveable clone project
+
+  datasource:
+    url: jdbc:mysql://localhost:32772/docker-MYSQL
+    username: root
+    password: admin@123
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format-sql: true
+
+
