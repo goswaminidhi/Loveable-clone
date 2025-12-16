@@ -15,7 +15,7 @@ public class Subscription {
 
     Long id;
 
-    User user;//here we are not using id, instead using direct user hibernate will play the role
+    User user;//here we are not using id, instead using direct user hibernate will play the projectRole
     Plan plan;
 
     SubscriptionStatus status;

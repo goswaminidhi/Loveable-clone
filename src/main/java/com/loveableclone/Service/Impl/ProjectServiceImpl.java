@@ -21,12 +21,12 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional
-@FieldDefaults(makeFinal = true,level = AccessLevel.PRIVATE)
+//@FieldDefaults(makeFinal = true,level = AccessLevel.PRIVATE)
 public class ProjectServiceImpl implements ProjectService {
 
-    ProjectRepository projectRepository;
-    UserRepository userRepository;
-    ProjectMapper projectMapper;
+    private final ProjectRepository projectRepository;
+    private final UserRepository userRepository;
+    private final ProjectMapper projectMapper;
 
     @Override
     public ProjectResponse createProject(ProjectRequest request, Long id) {
