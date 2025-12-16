@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -61,23 +63,36 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectResponse getUserProjectById(Long id, Long userId) {
-        return null;
+        Project projects = getAccessibleProjectById(id,userId);
+        return projectMapper.toProjectResponse(projects);
     }
-
-    @Override
-    public String deleteProject(Long id) {
-        return "";
-    }
-
-
 
     @Override
     public ProjectResponse updatedProject(Long id, ProjectRequest request, Long userId) {
-        return null;
+        Project project = getAccessibleProjectById(id,userId);
+        if(!project.getOwner().getId().equals(userId)){
+            throw new RuntimeException("You are not allowed to update");
+        }
+        project.setName(request.name());
+        project = projectRepository.save(project); //This is not imp to write because we are using @Transactional
+//        here. It will automatically save it.
+        //If I am doing this then commit will only happen when whole block is successfully  executed .
+        //If I want first execute this statement then go ahead.
+        return projectMapper.toProjectResponse(project);
     }
 
     @Override
     public void softDelete(Long id, Long userId) {
+        Project project = getAccessibleProjectById(id,userId);
+        if(!project.getOwner().getId().equals(userId)){
+            throw new RuntimeException("You are not allowed to delete");
+        }
+        project.setDeletedAt(Instant.now());
+        projectRepository.save(project);
+    }
 
+
+    public Project getAccessibleProjectById(Long projectId,Long userId){
+        return projectRepository.findAccessibleProjectById(projectId,userId).orElseThrow();
     }
 }

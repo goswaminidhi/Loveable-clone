@@ -11,9 +11,6 @@ public interface ProjectService {
 
     ProjectResponse getUserProjectById(Long id,Long userId);
 
-
-    String deleteProject(Long id);
-
     ProjectResponse createProject(ProjectRequest request,Long id);
 
     ProjectResponse updatedProject(Long id, ProjectRequest request, Long userId);
