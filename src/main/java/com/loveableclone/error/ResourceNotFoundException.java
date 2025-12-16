@@ -1,0 +1,13 @@
+package com.loveableclone.error;
+
+
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class ResourceNotFoundException extends RuntimeException {
+    String resourceName;
+    String resourceId;
+}
