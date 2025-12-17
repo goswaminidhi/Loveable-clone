@@ -12,7 +12,7 @@ public record ApiError(
         String message,
         Instant timestamp,
         @JsonInclude(JsonInclude.Include.NON_NULL) List<ApiFieldError> errors //When it is not null only then it will
-        // bw included
+        // be included
 
 ) {
     public ApiError(HttpStatus httpStatus, String message) {

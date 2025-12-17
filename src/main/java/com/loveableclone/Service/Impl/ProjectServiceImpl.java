@@ -1,5 +1,6 @@
 package com.loveableclone.Service.Impl;
 
+import com.loveableclone.Repository.ProjectMemberRepository;
 import com.loveableclone.Repository.ProjectRepository;
 import com.loveableclone.Repository.UserRepository;
 import com.loveableclone.Service.ProjectService;
@@ -7,7 +8,10 @@ import com.loveableclone.dto.project.ProjectRequest;
 import com.loveableclone.dto.project.ProjectResponse;
 import com.loveableclone.dto.project.ProjectSummaryResponse;
 import com.loveableclone.entity.Project;
+import com.loveableclone.entity.ProjectMember;
+import com.loveableclone.entity.ProjectMemberId;
 import com.loveableclone.entity.User;
+import com.loveableclone.enums.ProjectRole;
 import com.loveableclone.error.ResourceNotFoundException;
 import com.loveableclone.mapper.ProjectMapper;
 import lombok.AccessLevel;
@@ -22,22 +26,39 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional
-//@FieldDefaults(makeFinal = true,level = AccessLevel.PRIVATE)
 public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final ProjectMapper projectMapper;
+    private final ProjectMemberRepository projectMemberRepository;
 
     @Override
     public ProjectResponse createProject(ProjectRequest request, Long id) {
-        User owner = userRepository.findById(id).orElseThrow();
+        User owner = userRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("User",id.toString())
+        );
         Project project = Project.builder()
                 .name(request.name())
-                .owner(owner)
                 .isPublic(false)
                 .build();
+
         project = projectRepository.save(project);
+
+        ProjectMemberId projectMemberId = new ProjectMemberId(project.getId(), owner.getId());
+
+        ProjectMember projectMember = ProjectMember.builder()
+                .id(projectMemberId)
+                .projectRole(ProjectRole.OWNER)
+                .user(owner)
+                .project(project)
+                .acceptedAt(Instant.now())
+                .invitedAt(Instant.now())
+                .build();
+
+        projectMemberRepository.save(projectMember);
+
+
         //Converting Project entity -> project dto
         //Method 1 - set all properties manual
         //Method 2 - use model mapper, but it does not support record
@@ -71,9 +92,11 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectResponse updatedProject(Long id, ProjectRequest request, Long userId) {
         Project project = getAccessibleProjectById(id, userId);
-        if (!project.getOwner().getId().equals(userId)) {
-            throw new RuntimeException("You are not allowed to update");
-        }
+
+//        if (!project.getOwner().getId().equals(userId)) {
+//            throw new RuntimeException("You are not allowed to update");
+//        }
+
         project.setName(request.name());
         project = projectRepository.save(project); //This is not imp to write because we are using @Transactional
 //        here. It will automatically save it.
@@ -85,9 +108,9 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public void softDelete(Long id, Long userId) {
         Project project = getAccessibleProjectById(id, userId);
-        if (!project.getOwner().getId().equals(userId)) {
-            throw new RuntimeException("You are not allowed to delete");
-        }
+//        if (!project.getOwner().getId().equals(userId)) {
+//            throw new RuntimeException("You are not allowed to delete");
+//        }
         project.setDeletedAt(Instant.now());
         projectRepository.save(project);
     }

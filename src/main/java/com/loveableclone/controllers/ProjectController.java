@@ -21,7 +21,7 @@ public class ProjectController {
     //Getting All Project
     @GetMapping
     public ResponseEntity<List<ProjectSummaryResponse>> getMyProjects(){
-        Long userId = 1L;//This is hardcoded will change later on.
+        Long userId = 1L; //This is hardcoded will change later on.
         return ResponseEntity.ok(projectService.getUserProject(userId));
     }
 

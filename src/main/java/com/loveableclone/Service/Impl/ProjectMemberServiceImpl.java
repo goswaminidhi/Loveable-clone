@@ -35,31 +35,23 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     public List<MemberResponse> getProjectMembers(Long projectId, Long userId) {
         Project project = getAccessibleProjectById(projectId, userId);
 
-        List<MemberResponse> memberResponsesList = new ArrayList<>();
-
-        MemberResponse responseFromOwner = projectMemberMapper.toProjectMemberResponseFromOwner(project.getOwner());
-        memberResponsesList.add(responseFromOwner);//need to convert  memberResponse to user.
-
-        List<MemberResponse> memberResponseList = projectMemberRepository.findByIdProjectId(projectId)
+        return projectMemberRepository.findByIdProjectId(projectId)
                 .stream()
                 .map(projectMemberMapper::toProjectMemberResponseFromMember)
                 .toList();
-
-        memberResponsesList.addAll(memberResponseList);
-
-        return memberResponsesList;
     }
 
     @Override
     public MemberResponse inviteMember(Long projectId, InviteMemberRequest request, Long userId) {
         Project project = getAccessibleProjectById(projectId, userId);
 
-        if (!project.getOwner().getId().equals(userId)) {
-            throw new RuntimeException("You are not allowed to invite member.");
-        }
+//        if (!project.getOwner().getId().equals(userId)) {
+//            throw new RuntimeException("You are not allowed to invite member.");
+//        } //Handle it in authorization (security)
 
 
-        User invitee = userRepository.findByEmail(request.email()).orElseThrow();//This is the email of the user which we want to invite
+        User invitee = userRepository.findByUsername(request.username()).orElseThrow();//This is the email of the user which we
+        // want to invite
 
         if (invitee.getId().equals(userId)) {
             throw new RuntimeException("Cannot invite yourself");
@@ -87,9 +79,9 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     public MemberResponse updateMemberRole(Long projectId, Long memberId, UpdateMemberRoleRequest request, Long userId) {
         Project project = getAccessibleProjectById(projectId, userId);
 
-        if (!project.getOwner().getId().equals(userId)) {
-            throw new RuntimeException("You are not allowed to invite member.");
-        }
+//        if (!project.getOwner().getId().equals(userId)) {
+//            throw new RuntimeException("You are not allowed to invite member.");
+//        }
 
         ProjectMemberId projectMemberId = new ProjectMemberId(projectId, memberId);
         ProjectMember projectMember = projectMemberRepository.findById(projectMemberId).orElseThrow();
@@ -104,9 +96,9 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     public void removeProjectMemberRole(Long projectId, Long memberId, Long userId) {
         Project project = getAccessibleProjectById(projectId, userId);
 
-        if (!project.getOwner().getId().equals(userId)) {
-            throw new RuntimeException("Not allowed.");
-        }
+//        if (!project.getOwner().getId().equals(userId)) {
+//            throw new RuntimeException("Not allowed.");
+//        }
 
         ProjectMemberId projectMemberId = new ProjectMemberId(projectId, memberId);
         if (!projectMemberRepository.existsById(projectMemberId)) {
