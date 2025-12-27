@@ -8,7 +8,11 @@ import com.loveableclone.dto.auth.SignupRequest;
 import com.loveableclone.entity.User;
 import com.loveableclone.error.BadRequestException;
 import com.loveableclone.mapper.UserMapper;
+import com.loveableclone.security.AuthUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +23,8 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
-
+    private final AuthUtil authUtil;
+    private final AuthenticationManager authenticationManager;
 
     @Override
     public AuthResponse signup(SignupRequest request) {
@@ -31,11 +36,22 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(request.password()));
 
         userRepository.save(user);
-        return new AuthResponse("dummy",userMapper.toUserProfileResponse(user));
+
+        String token = authUtil.generateAccessToken(user);//Token is generated
+
+        return new AuthResponse(token, userMapper.toUserProfileResponse(user));
     }
 
     @Override
     public AuthResponse login(LoginRequest request) {
-        return null;
+        Authentication authentication = authenticationManager.authenticate(
+                 new UsernamePasswordAuthenticationToken(request.username(),request.password())
+        );
+        //Success authentication will give the authentication object else will throw error
+
+        User user = (User) authentication.getPrincipal();
+        String token = authUtil.generateAccessToken(user);
+
+        return new AuthResponse(token, userMapper.toUserProfileResponse(user));
     }
 }

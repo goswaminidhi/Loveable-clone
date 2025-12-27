@@ -14,6 +14,7 @@ import com.loveableclone.entity.User;
 import com.loveableclone.enums.ProjectRole;
 import com.loveableclone.error.ResourceNotFoundException;
 import com.loveableclone.mapper.ProjectMapper;
+import com.loveableclone.security.AuthUtil;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -32,12 +33,20 @@ public class ProjectServiceImpl implements ProjectService {
     private final UserRepository userRepository;
     private final ProjectMapper projectMapper;
     private final ProjectMemberRepository projectMemberRepository;
+    private final AuthUtil authUtil;
 
     @Override
-    public ProjectResponse createProject(ProjectRequest request, Long id) {
-        User owner = userRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("User",id.toString())
-        );
+    public ProjectResponse createProject(ProjectRequest request) {
+
+        Long id = authUtil.getCurrentUserId();
+//        User owner = userRepository.findById(id).orElseThrow(
+//                () -> new ResourceNotFoundException("User",id.toString())
+//        );This is calling database and giving the whole user, but we don't need the whole user, we just need
+//        reference to connect
+        User owner = userRepository.getReferenceById(authUtil.getCurrentUserId());
+        //If we ever want to get owner.getName() or anything else than it (owner) will call the database.
+
+        
         Project project = Project.builder()
                 .name(request.name())
                 .isPublic(false)
@@ -69,7 +78,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectSummaryResponse> getUserProject(Long userId) {
+    public List<ProjectSummaryResponse> getUserProject() {
         //Here we are getting all the projects of the user and also the project whose member the user is
 
         //This is 1 Method if doing this
@@ -79,18 +88,21 @@ public class ProjectServiceImpl implements ProjectService {
 //                .collect(Collectors.toList());
 
         //Another method
+        Long userId = authUtil.getCurrentUserId();
         var projects = projectRepository.findByAllAccessibleByUser(userId);
         return projectMapper.toListOfProjectSummaryResponse(projects);
     }
 
     @Override
-    public ProjectResponse getUserProjectById(Long id, Long userId) {
+    public ProjectResponse getUserProjectById(Long id) {
+        Long userId = authUtil.getCurrentUserId();
         Project projects = getAccessibleProjectById(id, userId);
         return projectMapper.toProjectResponse(projects);
     }
 
     @Override
-    public ProjectResponse updatedProject(Long id, ProjectRequest request, Long userId) {
+    public ProjectResponse updatedProject(Long id, ProjectRequest request) {
+        Long userId = authUtil.getCurrentUserId();
         Project project = getAccessibleProjectById(id, userId);
 
 //        if (!project.getOwner().getId().equals(userId)) {
@@ -106,7 +118,8 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void softDelete(Long id, Long userId) {
+    public void softDelete(Long id) {
+        Long userId = authUtil.getCurrentUserId();
         Project project = getAccessibleProjectById(id, userId);
 //        if (!project.getOwner().getId().equals(userId)) {
 //            throw new RuntimeException("You are not allowed to delete");
@@ -116,7 +129,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
 
-    public Project getAccessibleProjectById(Long projectId, Long userId) {
+    public Project getAccessibleProjectById(Long projectId,Long userId) {
         return projectRepository.findAccessibleProjectById(projectId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", projectId.toString()));
 

@@ -7,14 +7,14 @@ import com.loveableclone.dto.project.ProjectSummaryResponse;
 import java.util.List;
 
 public interface ProjectService {
-     List<ProjectSummaryResponse> getUserProject(Long userId);
+     List<ProjectSummaryResponse> getUserProject();
 
-    ProjectResponse getUserProjectById(Long id,Long userId);
+    ProjectResponse getUserProjectById(Long id);
 
-    ProjectResponse createProject(ProjectRequest request,Long id);
+    ProjectResponse createProject(ProjectRequest request);
 
-    ProjectResponse updatedProject(Long id, ProjectRequest request, Long userId);
+    ProjectResponse updatedProject(Long id, ProjectRequest request);
 
-    void softDelete(Long id, Long userId);
+    void softDelete(Long id);
 
 }

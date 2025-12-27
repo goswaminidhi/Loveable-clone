@@ -1,0 +1,53 @@
+package com.loveableclone.security;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+
+@Component
+@Slf4j
+@RequiredArgsConstructor
+public class JwtAuthFilter extends OncePerRequestFilter {
+    //This class is to verify or authenticate the token
+    //These filters will intercept the request before going to the mvc architecture or dispatcher servlet
+
+    private final AuthUtil authUtil;
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
+
+        log.info("incoming request: {}", request.getRequestURI());
+        final String requestHeaderToken = request.getHeader("Authorization");
+        if (requestHeaderToken == null || !requestHeaderToken.startsWith("Bearer")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        //Authorization: Bearer djnvoi.cdbiufsidwvfidknvhdolcsl
+
+        String jwtToken = requestHeaderToken.split("Bearer ")[1]; //Take the 2nd part i.e djnvoi
+        // .cdbiufsidwvfidknvhdolcsl
+
+        JwtUserPrincipal user = authUtil.verifyAccessToken(jwtToken);//This will verify the token
+
+        if (user != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                    user,null,user.authorities());
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        }
+        filterChain.doFilter(request,response);
+
+
+    }
+
+}

@@ -12,6 +12,7 @@ import com.loveableclone.entity.ProjectMember;
 import com.loveableclone.entity.ProjectMemberId;
 import com.loveableclone.entity.User;
 import com.loveableclone.mapper.ProjectMemberMapper;
+import com.loveableclone.security.AuthUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,9 +31,11 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     private final ProjectRepository projectRepository;
     private final ProjectMemberMapper projectMemberMapper;
     private final UserRepository userRepository;
+    private final AuthUtil authUtil;
 
     @Override
-    public List<MemberResponse> getProjectMembers(Long projectId, Long userId) {
+    public List<MemberResponse> getProjectMembers(Long projectId) {
+        Long userId = authUtil.getCurrentUserId();
         Project project = getAccessibleProjectById(projectId, userId);
 
         return projectMemberRepository.findByIdProjectId(projectId)
@@ -42,7 +45,8 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     }
 
     @Override
-    public MemberResponse inviteMember(Long projectId, InviteMemberRequest request, Long userId) {
+    public MemberResponse inviteMember(Long projectId, InviteMemberRequest request) {
+        Long userId = authUtil.getCurrentUserId();
         Project project = getAccessibleProjectById(projectId, userId);
 
 //        if (!project.getOwner().getId().equals(userId)) {
@@ -76,7 +80,8 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     }
 
     @Override
-    public MemberResponse updateMemberRole(Long projectId, Long memberId, UpdateMemberRoleRequest request, Long userId) {
+    public MemberResponse updateMemberRole(Long projectId, Long memberId, UpdateMemberRoleRequest request) {
+        Long userId = authUtil.getCurrentUserId();
         Project project = getAccessibleProjectById(projectId, userId);
 
 //        if (!project.getOwner().getId().equals(userId)) {
@@ -93,7 +98,8 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     }
 
     @Override
-    public void removeProjectMemberRole(Long projectId, Long memberId, Long userId) {
+    public void removeProjectMemberRole(Long projectId, Long memberId) {
+        Long userId = authUtil.getCurrentUserId();
         Project project = getAccessibleProjectById(projectId, userId);
 
 //        if (!project.getOwner().getId().equals(userId)) {
