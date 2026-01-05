@@ -48,8 +48,9 @@ public class AuthServiceImpl implements AuthService {
                  new UsernamePasswordAuthenticationToken(request.username(),request.password())
         );
         //Success authentication will give the authentication object else will throw error
-
-        User user = (User) authentication.getPrincipal();
+        System.out.println("Authenticated?:"+authentication.isAuthenticated());
+        User user = (User) authentication.getPrincipal();//here user is inside  this principle
+        //getPrincipal() =  Stores the logged-in user object inside principal
         String token = authUtil.generateAccessToken(user);
 
         return new AuthResponse(token, userMapper.toUserProfileResponse(user));
